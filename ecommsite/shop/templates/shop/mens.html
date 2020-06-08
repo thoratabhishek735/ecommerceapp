@@ -1,0 +1,205 @@
+{% extends 'shop/basic.html' %}
+
+{% block title %} Mens {% endblock %}
+
+{% block css %} <style>
+ #navbarSupportedContent {
+
+font-size:25px;
+
+
+}
+.navbar-brand img{
+  height: 70px;
+  width: 150px;
+}
+  .card img {
+    height: 330px;
+  }
+  .card{
+    border: 2px solid rgb(85, 84, 84);
+  }
+
+  body {
+    margin-left: 0;
+    margin-right: 0;
+
+  }
+</style>
+{% endblock css %}
+
+
+{% block body %}
+<h1 class="text-center"> Watches for men</h1>
+<div class="container-fluid ml-5">
+  <div class="row">
+    {% for i in prod %}
+    <div class="card col-md-3 col-xs-12 m-5 shadow" style="width: 18rem;">
+      <img src='/media/{{i.image}}' class="card-img-top" alt="...">
+      <div class="card-body">
+        <h3 class="card-title" id="namepm{{i.id}}">{{i.product_name}}</h3>
+        <p class="card-text" id="pricepm{{i.id}}">{{i.price}}</p>
+        <span id="divpm{{i.id}}" class="divpm">
+        <button class="btn btn-primary cart " id="pm{{i.id}}">Add To Cart</button>
+      </span>
+      <a href="/shop/productviewm/{{i.id}}" <button class="btn btn-dark  " id="qv{{i.id}}">Quick
+        View</button></a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+
+  
+
+
+  
+
+  if (localStorage.getItem('cart') == null) {
+    var cart ={};
+  }
+  else {
+    cart = JSON.parse(localStorage.getItem('cart'));
+   
+    updatecart(cart);
+  }
+
+  // If the add to cart button is clicked, add/increment the item
+  $('.divpm').on('click', 'button.cart', function(){
+   
+    var idstr = this.id.toString();
+   
+    if (cart[idstr] != undefined) {
+      qty = cart[idstr][0] + 1;
+    
+      cart[idstr] = [qty,name,price];
+    }
+    else {
+      qty=1
+      name="myitem"
+      if(idstr.slice(0,2)=="pm"){
+      name=document.getElementById('name'+ idstr).innerHTML;
+      price=document.getElementById('price'+ idstr).innerHTML;
+    
+      }
+      cart[idstr] = [qty,name,price];
+
+    }
+    updatecart(cart);
+    
+   
+  });
+  
+  function updatecart(cart){
+  
+    console.log(cart)
+  sum=0
+  
+  
+  for(item in cart){
+
+    if(item.slice(0,2)=='pm'){
+    sum=sum+cart[item][0]
+    
+  
+    document.getElementById('div'+ item).innerHTML="<button id='minus" + item + "' class='btn btn-primary minus'>-</button> <span id='val" + item + "''>" + cart[item][0] + "</span> <button id='plus" + item + "' class='btn btn-primary plus'> + </button>"         
+  }
+ 
+  localStorage.setItem('cart', JSON.stringify(cart));
+
+    document.getElementById('cart').innerHTML = sum;
+   
+    updatepopover(cart)
+  }
+}
+
+
+
+
+function clearcart(){
+  cart = JSON.parse(localStorage.getItem('cart'));
+  for(item in cart){
+    if(item.slice(0,2)=='pm'){
+      document.getElementById('div' + item).innerHTML='<button class="btn btn-primary cart " id="'+ item +'">Add To Cart</button>'
+    }
+
+  }
+  localStorage.clear();
+  cart={ };
+ 
+  document.getElementById('cart').innerHTML = 0
+  updatepopover(cart)
+
+}
+
+
+// If plus or minus button is clicked, change the cart as well as the display value
+$('.divpm').on('click',"button.minus",function(){
+  
+  a=this.id.slice(5, )//a=this.id gives id minuspm2 but we only want pm2 thats why we used .slice(6,)
+  
+  cart[a][0]=cart[a][0] -1;
+  cart[a][0]=Math.max(0,cart[a][0]);
+  document.getElementById('val'+a).innerHTML=cart[a][0]
+  updatecart(cart);
+
+})
+
+
+
+$('.divpm').on('click',"button.plus",function(){
+
+  a=this.id.slice(4, )//a=this.id gives id minuspm2 but we only want pm2 thats why we used .slice(4,)
+
+  cart[a][0]=cart[a][0] +1;
+ 
+  document.getElementById('val'+a).innerHTML=cart[a][0]
+  updatecart(cart);
+
+})
+
+
+//cart popover
+  $('#popcart').popover()
+ 
+
+updatepopover(cart);
+function updatepopover(cart){
+ 
+ var popstr=""
+  popstr="<h4 >Cart for your items</h4> <div class='mx-2'"
+
+  var i =1
+  for(var item in cart){
+       if(item.slice(0,2)=='pm'){
+       popstr=popstr +"<b>"+ i +"</b>. "
+       popstr=popstr + document.getElementById('name'+ item).innerHTML.slice(0,19) + "...Qty : " + cart[item][0] +'<br>'
+       i=i+1
+       }
+  }
+  popstr = popstr + "</div>" + "<a  href='/shop/checkout' class=' mx-5 my-5' id ='checkout'>CHECKOUT</a>" 
+  
+    console.log(popstr)
+  document.getElementById('popcart').setAttribute('data-content',popstr)
+  
+ 
+  
+  //console.log(popstr)
+  $('#popcart').popover('show')
+}
+
+
+
+
+
+
+
+</script>
+
+{% endblock  %}
